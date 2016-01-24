@@ -83,3 +83,28 @@ func (rd *Reader) Forget() {
 	for ; rd.current != rd.buffer.Front(); rd.buffer.Remove(rd.current.Prev()) {
 	}
 }
+
+// Peek returns at most the next n runes, reading from the uderlying source if
+// needed. Does not move the current index. It includes EOF if reached.
+func (rd *Reader) Peek(n int) []rune {
+	res := make([]rune, 0, n)
+	cursor := rd.current
+	for i := 0; i < n; i++ {
+		if cursor == nil {
+			err := rd.feedBuffer()
+			if err != nil {
+				return res
+			}
+			cursor = rd.buffer.Back()
+		}
+		if cursor != nil {
+			r := cursor.Value.(rune)
+			res = append(res, r)
+			if r == EOF {
+				return res
+			}
+			cursor = cursor.Next()
+		}
+	}
+	return res
+}
