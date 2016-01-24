@@ -1,5 +1,7 @@
 # buffruneio
 
+![Tests Status](https://travis-ci.org/pelletier/go-buffruneio.svg?branch=master)
+
 Buffruneio is a wrapper around bufio to provide buffered runes access with
 unlimited unreads.
 
