@@ -133,7 +133,6 @@ func TestForget(t *testing.T) {
 	if rd.UnreadRune() != ErrNoRuneToUnread {
 		t.Fatal("no rune should be available")
 	}
-	assumeRune(t, rd, 'i') // a bug!
 	assumeRune(t, rd, 'o')
 }
 
@@ -252,8 +251,7 @@ func benchmarkRead(b *testing.B, count int, forget bool) {
 				b.Fatal(err)
 			}
 			if r != EOF {
-				// Forget is buggy, don't crash
-				// b.Fatalf("missing EOF - %q", r)
+				b.Fatalf("missing EOF - %q", r)
 			}
 			if repeat == count-1 {
 				break
