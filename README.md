@@ -36,7 +36,7 @@ The documentation and additional examples are available at
 ## Contribute
 
 Feel free to report bugs and patches using GitHub's pull requests system on
-[pelletier/go-toml](https://github.com/pelletier/go-buffruneio). Any feedback is
+[pelletier/go-buffruneio](https://github.com/pelletier/go-buffruneio). Any feedback is
 much appreciated!
 
 ## LICENSE
