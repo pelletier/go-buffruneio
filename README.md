@@ -3,8 +3,7 @@
 [![Tests Status](https://travis-ci.org/pelletier/go-buffruneio.svg?branch=master)](https://travis-ci.org/pelletier/go-buffruneio)
 [![GoDoc](https://godoc.org/github.com/pelletier/go-buffruneio?status.svg)](https://godoc.org/github.com/pelletier/go-buffruneio)
 
-Buffruneio is a wrapper around bufio to provide buffered runes access with
-unlimited unreads.
+Buffruneio provides rune-based buffered input.
 
 ```go
 import "github.com/pelletier/go-buffruneio"
