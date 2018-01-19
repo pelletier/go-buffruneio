@@ -98,7 +98,7 @@ func (rd *Reader) Forget() {
 	rd.buffer = rd.buffer[:n]
 }
 
-// PeekRune returns the next n runes in the input,
+// PeekRunes returns the next n runes in the input,
 // without advancing the current input position.
 //
 // If the input has fewer than n runes and then returns
