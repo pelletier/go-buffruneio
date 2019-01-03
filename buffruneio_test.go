@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"unicode/utf8"
+	"io"
+	"fmt"
 )
 
 func assertNoError(t *testing.T, err error) {
@@ -260,5 +262,77 @@ func benchmarkRead(b *testing.B, count int, forget bool) {
 				// keep unreading
 			}
 		}
+	}
+}
+
+// test reader that will fail reading after a given number of reads
+type failingReader struct {
+	r io.Reader // underlying reader
+	failAfter int // start failing after that number of reads
+	readCount int // number of reads already done
+}
+
+func newFailingReaderFromString(s string, failAfter int) *failingReader {
+	return &failingReader{
+		r: strings.NewReader(s),
+		failAfter: failAfter,
+		readCount: 0,
+	}
+}
+
+func (r *failingReader) Read(b []byte) (n int, err error) {
+	if r.readCount < r.failAfter {
+		n, err = r.r.Read(b)
+		r.readCount++
+		return
+	}
+	return 0, fmt.Errorf("expected read failure")
+}
+
+func TestReadFails(t *testing.T) {
+	size := 4097 // needs to be more than bufio.defaultBufSize, which is 4096
+	s := make([]byte, size)
+	for i := 0; i < size; i++ {
+		s[i] = 'a'
+	}
+
+	rd := NewReader(newFailingReaderFromString(string(s), 1))
+
+	runes := rd.PeekRunes(256) // first read, ok
+
+	runes = rd.PeekRunes(1) // rune already loaded, ok
+
+	runes = rd.PeekRunes(4097) // forces a new read, fails
+	if len(runes) != 4096 {
+		t.Fatalf("expected %d runes. got %d", 4096, len(runes))
+	}
+	if runes[4095] != 'a' {
+		t.Fatalf("expected last rune to be 'a'. got '%c'", runes[4095])
+	}
+
+
+	rd = NewReader(newFailingReaderFromString(string(s), 1))
+	for i := 0; i < size - 1; i++ {
+		r, size, err := rd.ReadRune() // read all the runes but last
+		if err != nil {
+			t.Fatalf("no error expeceted at that point, got %s", err)
+		}
+		if size != 1 {
+			t.Fatalf("reading runes that should have size 1, got size %d", size)
+		}
+		if r != 'a' {
+			t.Fatalf("reading a string of 'a', got %c", r)
+		}
+	}
+	//  EOF, 0, err
+	r, n, err := rd.ReadRune() // should error
+	if r != EOF {
+		t.Fatalf("expected EOF, got %c", r)
+	}
+	if n != 0 {
+		t.Fatalf("expected size 0, got %d", n)
+	}
+	if err.Error() != "expected read failure" {
+		t.Fatalf("incorrect error: %s", err.Error())
 	}
 }
